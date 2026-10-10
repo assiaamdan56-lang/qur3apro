@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qur3a Pro</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stylepro.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- ================= HOME ================= -->
+    <section id="homePage" class="page active">
+        <div class="home-content">
+            <div class="logo">
+                <span>Q</span>ur3a
+                <small>Pro ✨</small>
+            </div>
+
+            <p class="tagline">
+                Ass2ila, s7ab, w d7k bzaf... 🎲
+            </p>
+
+            <div class="home-actions">
+                <button class="home-card" onclick="openCreateRoomModal()">
+                    <div class="card-icon">＋</div>
+                    <div>
+                        <strong>Saweb room jdid</strong>
+                        <span>Créer une nouvelle salle</span>
+                    </div>
+                    <b>›</b>
+                </button>
+
+                <button class="home-card" onclick="openJoinRoomModal()">
+                    <div class="card-icon">↗</div>
+                    <div>
+                        <strong>Dkhl l room</strong>
+                        <span>Rejoindre une salle</span>
+                    </div>
+                    <b>›</b>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= GAME ================= -->
+    <section id="gamePage" class="page">
+        <header class="top-header">
+            <button class="header-button" onclick="leaveRoom()">‹</button>
+            <div>
+                <h2>L'L3ba 🎲</h2>
+                <span id="roomNumber">Room #2442</span>
+            </div>
+            <button class="header-button">⋯</button>
+        </header>
+
+        <!-- LOBBY -->
+        <div id="lobby" class="game-stage">
+            <div class="room-badge" id="badgeRoomCode">Room #2442</div>
+
+            <div class="dice-container">
+                <div id="dice" class="dice">⚄</div>
+            </div>
+
+            <h3 id="diceMessage">Chkon lqor3a?</h3>
+
+            <button class="main-button" onclick="startDraw()">
+                🎲 Dir l'qor3a
+            </button>
+
+            <div class="players-box">
+                <div class="section-title">
+                    <span>Les joueurs (<span id="playerCount">3</span>)</span>
+                    <button onclick="showAllPlayers()">Shof kolshi 👁️</button>
+                </div>
+
+                <div class="players" id="playersListContainer">
+                    <div class="player">
+                        <div class="avatar pink">S</div>
+                        <span>Sara</span>
+                        <small>👑</small>
+                    </div>
+                    <div class="player">
+                        <div class="avatar blue">Y</div>
+                        <span>Yassine</span>
+                    </div>
+                    <div class="player">
+                        <div class="avatar purple">L</div>
+                        <span>Lina</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUESTION -->
+        <div id="questionStage" class="game-stage hidden">
+            <div class="chosen-player">
+                <div class="avatar large pink" id="chosenAvatarLetter">S</div>
+                <strong id="chosenPlayerText">Sara - jat fik l'qor3a! 🎉</strong>
+            </div>
+
+            <div class="question-card">
+                <span>SAWAL</span>
+                <p id="questionText">Quel est le plus grand océan du monde ?</p>
+            </div>
+
+            <div class="timer">
+                <span>⏱</span>
+                <strong id="timer">01:00</strong>
+            </div>
+
+            <div class="answer-buttons">
+                <button class="answer yes" onclick="answered()">💎 Jawebt</button>
+                <button class="answer no" onclick="cantAnswer()">🔥 Ma 9dash njaweb</button>
+            </div>
+        </div>
+
+        <!-- JUDGE -->
+        <div id="judgeStage" class="game-stage hidden">
+            <div class="judge-title">
+                <span>⚖️</span>
+                <h2>Espace du Juge</h2>
+            </div>
+
+            <div class="add-judgement">
+                <input id="judgementInput" type="text" placeholder="Écris ton jugement...">
+                <button onclick="addJudgement()">+ Ajouter</button>
+            </div>
+
+            <h3>Les options de vote</h3>
+            <div id="voteOptions">
+                <button class="vote-option" onclick="vote(this)">
+                    <span>🔄 Refaire la question</span>
+                    <b>0%</b>
+                </button>
+                <button class="vote-option" onclick="vote(this)">
+                    <span>🎲 Refaire la carte</span>
+                    <b>0%</b>
+                </button>
+                <button class="vote-option" onclick="vote(this)">
+                    <span>⏩ Passer le tour</span>
+                    <b>0%</b>
+                </button>
+            </div>
+
+            <h3>Les jugements proposés</h3>
+            <div id="customJudgements"></div>
+        </div>
+    </section>
+
+
+    <!-- ================= CHAT ================= -->
+    <section id="chatPage" class="page">
+        <header class="chat-header">
+            <div>
+                <h2 id="chatHeaderCode">Room #2442</h2>
+                <span id="chatPlayersCount">3 حاضرین f l'room</span>
+            </div>
+            <button>⋯</button>
+        </header>
+
+        <div id="messages" class="messages">
+            <div class="message received">
+                <div class="avatar small blue">Y</div>
+                <div>
+                    <strong>Yassine</strong>
+                    <p>Salam 👋</p>
+                    <small>9:12 PM</small>
+                </div>
+            </div>
+
+            <div class="message sent">
+                <div>
+                    <p>Yesss ✨</p>
+                    <small>9:14 PM</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input id="messageInput" type="text" placeholder="Kteb chi message... ✨" onkeydown="handleMessage(event)">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+    </section>
+
+
+    <!-- ================= PROFILE ================= -->
+    <section id="profilePage" class="page">
+        <header class="profile-header">
+            <button class="header-button" onclick="showPage('gamePage')">‹</button>
+            <h2>Profil</h2>
+            <button class="header-button">⚙</button>
+        </header>
+
+        <div class="profile-info">
+            <div class="profile-avatar" id="profileAvatarLetter">
+                A
+                <span>👑</span>
+            </div>
+            <h2 id="profileDisplayName">Assia</h2>
+            <p id="profileUsername">@assia_11</p>
+            <div class="admin-badge" id="profileBadgeRole">👑 Admin</div>
+        </div>
+
+        <!-- QUESTIONS -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>📝 Ass2ila dyali</h3>
+                <button onclick="addQuestion()">＋ Zid sou2al</button>
+            </div>
+
+            <div class="my-question">
+                <span>Quel est le plus grand océan du monde ?</span>
+                <b>›</b>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>🎮 Historique dyali</h3>
+                <button>Shof kolshi</button>
+            </div>
+
+            <div class="history">
+                <div class="history-card">
+                    <strong>Room #2442</strong>
+                    <span>Gagné · 5/8</span>
+                    <small>12/10/2026</small>
+                </div>
+            </div>
+        </div>
+
+        <button id="adminPanelBtn" class="admin-panel-button" onclick="openAdmin()">
+            👑 Panel d'L'Admin
+        </button>
+    </section>
+
+
+    <!-- ================= ADMIN ================= -->
+    <section id="adminPage" class="page">
+        <header class="top-header">
+            <button class="header-button" onclick="showPage('profilePage')">‹</button>
+            <h2>Panel Admin 👑</h2>
+            <span></span>
+        </header>
+
+        <div class="admin-tabs">
+            <button id="questionsTab" class="active" onclick="showAdminTab('questions')">📝 Ass2ila</button>
+            <button id="playersTab" onclick="showAdminTab('players')">👥 La3aba</button>
+        </div>
+
+        <div id="adminQuestions">
+            <input class="search" placeholder="Rechercher une question...">
+            <div class="admin-item">
+                <span>Quel est le plus grand océan ?</span>
+                <div>✏️ 🗑️</div>
+            </div>
+        </div>
+
+        <div id="adminPlayers" class="hidden">
+            <input class="search" placeholder="Rechercher un joueur...">
+            <div class="admin-player">
+                <div class="avatar pink small">A</div>
+                <div>
+                    <strong>Assia</strong>
+                    <span>Admin</span>
+                </div>
+                <i>●</i>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ================= BOTTOM NAV (3 TABS ONLY) ================= -->
+    <nav id="bottomNav" class="bottom-nav">
+        <button class="nav-item active" onclick="showPage('gamePage')">
+            <span>🎲</span>
+            <small>L'L3ba</small>
+        </button>
+
+        <button class="nav-item" onclick="showPage('chatPage')">
+            <span>💬</span>
+            <small>Chat</small>
+        </button>
+
+        <button class="nav-item" onclick="showPage('profilePage')">
+            <span>👤</span>
+            <small>Profil</small>
+        </button>
+    </nav>
+
+
+    <!-- ================= MODALS (2 INPUTS FOR ROOMS) ================= -->
+
+    <!-- Modal Create Room -->
+    <div id="createRoomModal" class="modal hidden">
+        <div class="modal-box">
+            <button class="close" onclick="closeCreateModal()">×</button>
+            <h2>Saweb room jdid 👑</h2>
+            <input id="createHostName" placeholder="Smiytek (Admin)..." type="text">
+            <input id="createPinInput" placeholder="Code d'la room (ex: 2442)..." type="text">
+            <button class="main-button" onclick="confirmCreateRoom()">Saweb daba 🚀</button>
+        </div>
+    </div>
+
+    <!-- Modal Join Room -->
+    <div id="joinRoomModal" class="modal hidden">
+        <div class="modal-box">
+            <button class="close" onclick="closeJoinModal()">×</button>
+            <h2>Dkhl l room 🔗</h2>
+            <input id="joinRoomCodeInput" placeholder="Code d'la room..." type="text">
+            <input id="joinPlayerName" placeholder="Smiytek..." type="text">
+            <button class="main-button" onclick="confirmJoinRoom()">Dkhl 🎮</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="scriptpro.js"></script>
+
+</body>
+</html>
